@@ -1,64 +1,72 @@
-import React, {useState} from "react";
-import {axiosWithAuth} from '../utils/axiosWithAuth'
+import React, { Component } from 'react';
+import axios from 'axios';
+import '../App.css';
 
-const Login = props => {
+class Login extends Component {
+  state = {
+    credentials: {
+      username: '',
+      password: ''
+    }
+  };
 
-
-  //set state of login credentials
-  const [credentials, setCredentials] = useState({
-    username: "",
-    password: ""
-  })
-
-  //handle state change of login credentials
-  const handleChange = e => {
-    setCredentials({
-      ...credentials,
-      [e.target.name]: e.target.value
-    })
-    console.log('handleChange results: ', credentials)
+  componentDidMount() {
+    localStorage.clear();
   }
 
-  //login authentication function
-  const login = e => {
+  handleSubmit = e => {
     e.preventDefault();
 
-    axiosWithAuth()
-    .post('/api/login', credentials)
-    .then(res => {
-      console.log('login response: ', res);
-      localStorage.setItem('token', res.data.payload);
-      props.history.push('/protected');
-    })
-    .catch(err => {
-      console.log('login error: ', err)
-    })
+    axios
+      .post('http://localhost:5000/api/login', this.state.credentials)
+      .then(response => {
+        console.log(response.data);
+        localStorage.setItem('token', response.data.payload);
 
-  }
-  return (
-    <>
-      <h1>Welcome to the Bubble App!</h1>
-      <p>Build a login page here</p>
-      <div>
-        <form onSubmit={login}>
-          <input 
+        this.props.history.push('/BubblePage');
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  };
+
+  handleChange = e => {
+    this.setState({
+      credentials: {
+        ...this.state.credentials,
+        [e.target.name]: e.target.value
+      }
+    });
+    // console.log(this.state.credentials.username);
+  };
+
+  render() {
+    return (
+      <div className='formBody'>
+        <h1 className=''>Login</h1>
+        <form className='formArrange' onSubmit={this.handleSubmit}>
+          <input
+            className='input'
             type='text'
             name='username'
-            placeholder='Enter Username'
-            value={credentials.username}
-            onChange={handleChange}
+            value={this.state.credentials.username}
+            onChange={this.handleChange}
+            placeholder='UserName:'
           />
-          <input 
+          <input
+            className='input'
             type='password'
             name='password'
-            placeholder='Enter Password'
-            value={credentials.password}
-            onChange={handleChange}
+            value={this.state.credentials.password}
+            onChange={this.handleChange}
+            placeholder='Password:'
           />
-          <button>Log In</button>
+
+          <button className='button'>Log In</button>
         </form>
       </div>
-    </>
-  );
-};
+    );
+  }
+}
+
 export default Login;
